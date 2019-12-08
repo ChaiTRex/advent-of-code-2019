@@ -1,32 +1,30 @@
-import Data.Char  (isDigit)
+import Data.Maybe  (catMaybes)
 
-every :: Int -> [a] -> [[a]]
-every n xs = takeWhile (not . null) . go n $ xs
+parse :: Int -> Int -> String -> [[String]]
+parse cols rows = every rows . every cols . catMaybes . map toColor
   where
-    go :: Int -> [a] -> [[a]]
-    go n xs = take n xs:every n (drop n xs)
+    every :: Int -> [a] -> [[a]]
+    every n = takeWhile (not . null) . go n
+      where
+        go :: Int -> [a] -> [[a]]
+        go n xs = take n xs:go n (drop n xs)
 
-parse :: Int -> Int -> String -> [[[Int]]]
-parse cols rows = map (every cols) . every (cols * rows) . map (read . (: [])) . filter isDigit
+    toColor :: Char -> Maybe Char
+    toColor '0' = Just ' '
+    toColor '1' = Just '█'
+    toColor '2' = Just '▒'
+    toColor _   = Nothing
 
-layer :: [[[Int]]] -> [[Int]]
-layer xs = foldl1 (zipWith (zipWith combine)) xs
+combineLayers :: [[String]] -> [String]
+combineLayers = foldl1 (zipWith (zipWith combine))
   where
-    combine :: Int -> Int -> Int
-    combine 0 _ = 0
-    combine 1 _ = 1
-    combine 2 n = n
-
-color :: Int -> Char
-color 0 = ' '
-color 1 = '*'
-color 2 = 'x'
+    combine :: Char -> Char -> Char
+    combine '▒' c = c
+    combine c   _ = c
 
 main :: IO ()
 main = do
   xs <- fmap (parse 25 6) getContents
-  
-  let ys = snd . minimum $ zip (map (length . filter (== 0) . concat) xs) xs
-  print $ (length . filter (== 1) . concat $ ys) * (length . filter (== 2) . concat $ ys)
-  
-  mapM_ putStrLn . map (map color) . layer $ xs
+  print . product . tail . minimum . map (\ y -> map (\ c -> length . filter (== c) $ y) " █▒") . map concat $ xs
+  mapM_ putStrLn . combineLayers $ xs
+
