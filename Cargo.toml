@@ -3,4 +3,5 @@ members = [
     "intcode",
     "day1",
     "day2",
+    "day3",
 ]
