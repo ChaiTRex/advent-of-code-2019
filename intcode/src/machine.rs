@@ -434,6 +434,7 @@ enum UnfinishedMachineError {
     InvalidInstruction(&'static str),
 }
 
+#[derive(Debug)]
 pub enum MachineError {
     InvalidInstruction(&'static str, MachineWithError),
 }
