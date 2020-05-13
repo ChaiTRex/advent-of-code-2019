@@ -53,7 +53,12 @@ impl Machine {
             }),
             Err(x) => Err(match x {
                 UnfinishedMachineError::InvalidInstruction(message) => {
-                    MachineError::InvalidInstruction(message, MachineWithError { machine: self })
+                    MachineError::InvalidInstruction(
+                        message,
+                        self.instruction_pointer,
+                        self.memory[self.instruction_pointer],
+                        MachineWithError { machine: self },
+                    )
                 }
             }),
         }
@@ -436,5 +441,5 @@ enum UnfinishedMachineError {
 
 #[derive(Debug)]
 pub enum MachineError {
-    InvalidInstruction(&'static str, MachineWithError),
+    InvalidInstruction(&'static str, MachineWord, MachineWord, MachineWithError),
 }
