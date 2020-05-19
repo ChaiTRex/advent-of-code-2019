@@ -10,10 +10,10 @@ fn main() {
     println!("{}", paint_it(machine.clone(), Color::Black).keys().count());
 
     let painted_locations = paint_it(machine.clone(), Color::White);
-    let mut min_x = 0;
-    let mut max_x = 0;
-    let mut min_y = 0;
-    let mut max_y = 0;
+    let mut min_x = MachineWord::MAX;
+    let mut max_x = MachineWord::MIN;
+    let mut min_y = MachineWord::MAX;
+    let mut max_y = MachineWord::MIN;
     for (x, y) in painted_locations.keys() {
         min_x = min(*x, min_x);
         max_x = max(*x, max_x);
