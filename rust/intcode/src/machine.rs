@@ -206,7 +206,6 @@ impl Machine {
         }
     }
 
-    #[inline(always)]
     fn get_value(
         &self,
         addressing_mode: MachineWord,

@@ -1,8 +1,16 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Benchmark, Criterion};
 use intcode::machine::{Machine, MachinePause};
+use std::time::Duration;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("fibonacci -10 to 10 and 10,000", |b| b.iter(fibonacci));
+    c.bench(
+        "fibonacci",
+        Benchmark::new("-10 to 10,000", |b| b.iter(fibonacci))
+            .nresamples(10000)
+            .sample_size(100)
+            .warm_up_time(Duration::from_secs(30))
+            .measurement_time(Duration::from_secs(600)),
+    );
 }
 
 fn fibonacci() {
@@ -32,7 +40,7 @@ fn fibonacci() {
     .copied()
     .collect::<Machine>();
 
-    let mut fibs = vec![];
+    let mut fibs = Vec::with_capacity(21);
     for i in -10..=10 {
         match machine.execute() {
             Ok(MachinePause::AwaitingInput(new_machine)) => {
@@ -52,6 +60,21 @@ fn fibonacci() {
         fibs,
         vec![-55, 34, -21, 13, -8, 5, -3, 2, -1, 1, 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
     );
+
+    for i in 11..10_000 {
+        match machine.execute() {
+            Ok(MachinePause::AwaitingInput(new_machine)) => {
+                machine = new_machine.push_input(i);
+            }
+            _ => panic!("machine not awaiting input"),
+        }
+        match machine.execute() {
+            Ok(MachinePause::HasOutput(new_machine, _)) => {
+                machine = new_machine;
+            }
+            _ => panic!("machine not producing output"),
+        }
+    }
 
     match machine.execute() {
         Ok(MachinePause::AwaitingInput(new_machine)) => {
