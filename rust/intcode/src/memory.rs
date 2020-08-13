@@ -16,7 +16,7 @@ const MEMORY_LINE_BITMASK: MachineWord = (1 << MEMORY_LINE_ADDRESS_BITS) - 1;
 
 #[derive(Clone, Debug)]
 pub struct Memory {
-    line_zero: MemoryLine,
+    line_zero: Box<MemoryLine>,
     lines: HashMap<MachineWord, MemoryLine>,
 }
 
