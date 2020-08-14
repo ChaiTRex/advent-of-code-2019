@@ -1,9 +1,9 @@
 use crate::memory::Memory;
-use std::{error::Error, fs::File, io::Read, iter::FromIterator};
+use std::{error::Error, fs::File, io::Read, iter::FromIterator, path::Path};
 
 pub type MachineWord = i64;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Machine {
     memory: Memory,
     instruction_pointer: MachineWord,
@@ -22,14 +22,14 @@ impl Machine {
 
     pub fn from_str(code: &str) -> Result<Machine, Box<dyn Error>> {
         let mut memory = Memory::new();
-        for (i, line) in (0..MachineWord::MAX).zip(code.split(',')) {
+        for (i, line) in (0..).zip(code.split(',')) {
             memory[i] = line.trim().parse()?;
         }
 
         Ok(Machine::new(memory))
     }
 
-    pub fn from_file(filepath: &str) -> Result<Machine, Box<dyn Error>> {
+    pub fn from_file<P: AsRef<Path>>(filepath: P) -> Result<Machine, Box<dyn Error>> {
         let mut file = File::open(filepath)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
@@ -283,8 +283,6 @@ impl Machine {
     }
 }
 
-impl Eq for Machine {}
-
 impl FromIterator<MachineWord> for Machine {
     #[inline(always)]
     fn from_iter<I: IntoIterator<Item = MachineWord>>(iter: I) -> Self {
@@ -299,7 +297,7 @@ impl<'a> FromIterator<&'a MachineWord> for Machine {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MachineAwaitingInput {
     machine: Machine,
     destination: MachineWord,
@@ -342,9 +340,7 @@ impl MachineAwaitingInput {
     }
 }
 
-impl Eq for MachineAwaitingInput {}
-
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct HaltedMachine {
     machine: Machine,
 }
@@ -381,9 +377,7 @@ impl HaltedMachine {
     }
 }
 
-impl Eq for HaltedMachine {}
-
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MachineWithError {
     machine: Machine,
 }
@@ -419,8 +413,6 @@ impl MachineWithError {
         self.machine.relative_base_mut()
     }
 }
-
-impl Eq for MachineWithError {}
 
 enum UnfinishedMachinePause {
     AwaitingInput(MachineWord),
