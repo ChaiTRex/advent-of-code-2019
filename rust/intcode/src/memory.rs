@@ -17,7 +17,7 @@ const MEMORY_LINE_BITMASK: MachineWord = (1 << MEMORY_LINE_ADDRESS_BITS) - 1;
 #[derive(Clone, Debug)]
 pub struct Memory {
     line_zero: Box<MemoryLine>,
-    lines: HashMap<MachineWord, MemoryLine>,
+    lines: HashMap<MachineWord, Box<MemoryLine>>,
 }
 
 impl Memory {
@@ -98,8 +98,8 @@ impl PartialEq for Memory {
                 .iter()
                 .all(|i| match (self.lines.get(i), other.lines.get(i)) {
                     (Some(xs), Some(ys)) => xs == ys,
-                    (Some(xs), None) => *xs == MEMORY_LINE_OF_ZEROS,
-                    (None, Some(ys)) => MEMORY_LINE_OF_ZEROS == *ys,
+                    (Some(xs), None) => **xs == MEMORY_LINE_OF_ZEROS,
+                    (None, Some(ys)) => MEMORY_LINE_OF_ZEROS == **ys,
                     (None, None) => unreachable!(),
                 })
     }
